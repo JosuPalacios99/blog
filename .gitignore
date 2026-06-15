@@ -2,3 +2,10 @@
 /resources/_gen/
 .hugo_build.lock
 .DS_Store
+
+# Volcado original de Obsidian (fuente cruda; el post ya vive en content/posts/)
+/Posts/
+
+# Posts ocultos (draft) — no publicar su fuente en el repo público todavía
+/content/posts/red-teaming-pensar-como-el-adversario/
+/content/posts/que-servicio-de-seguridad-ofensiva-necesitas/

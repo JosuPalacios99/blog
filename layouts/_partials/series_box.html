@@ -1,0 +1,19 @@
+{{- $series := .GetTerms "series" }}
+{{- with $series }}
+{{- $term := index . 0 }}
+{{- $cur := $.RelPermalink }}
+<aside class="rt-series-box">
+  <p class="rt-series-title"><span class="rt-prompt">&gt;</span> {{ i18n "series_label" }} «{{ $term.LinkTitle }}»</p>
+  <ol class="rt-series-list">
+    {{- range $i, $p := $term.Pages.ByDate }}
+    <li{{ if eq $p.RelPermalink $cur }} class="current" aria-current="true"{{ end }}>
+      {{- if eq $p.RelPermalink $cur }}
+      <span>{{ $p.LinkTitle }}</span>
+      {{- else }}
+      <a href="{{ $p.Permalink }}">{{ $p.LinkTitle }}</a>
+      {{- end }}
+    </li>
+    {{- end }}
+  </ol>
+</aside>
+{{- end }}

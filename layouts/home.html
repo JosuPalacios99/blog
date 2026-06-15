@@ -1,0 +1,71 @@
+{{- define "main" }}
+
+{{/* ===== HERO ===== */}}
+<section class="rt-hero">
+  <div class="rt-terminal">
+    <div class="rt-term-bar">
+      <span class="rt-dot rt-red"></span>
+      <span class="rt-dot rt-yellow"></span>
+      <span class="rt-dot rt-green"></span>
+      <span class="rt-term-title">j0su@redteam: ~</span>
+    </div>
+    <div class="rt-term-body">
+      <p class="rt-line"><span class="rt-prompt">j0su@redteam:~$</span> whoami</p>
+      <h1 class="rt-name glitch" data-text="j0su">j0su</h1>
+      <p class="rt-line"><span class="rt-prompt">j0su@redteam:~$</span> cat role.txt</p>
+      <p class="rt-typed">Red Team Operator<span class="rt-cursor">_</span></p>
+      <p class="rt-line rt-tags">
+        <span class="rt-chip">red-team</span>
+        <span class="rt-chip">adversary-emulation</span>
+        <span class="rt-chip">apt</span>
+        <span class="rt-chip">ttp</span>
+      </p>
+      <p class="rt-line rt-actions">
+        <a href="{{ "posts/" | relLangURL }}" class="rt-btn rt-btn-primary">{{ if eq site.Language.Lang "en" }}./read_posts{{ else }}./leer_posts{{ end }}</a>
+        <a href="https://github.com/JosuPalacios99" class="rt-btn" target="_blank" rel="noopener">github &#8599;</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+{{/* ===== POSTS ===== */}}
+{{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}
+{{- $pages = where $pages "Params.hiddenInHomeList" "!=" "true" }}
+{{- $pages = $pages.ByDate.Reverse }}
+{{- $paginator := .Paginate $pages }}
+
+<h2 class="rt-section-title"><span class="rt-prompt">&gt;</span> {{ if eq site.Language.Lang "en" }}Latest posts{{ else }}Últimos posts{{ end }}</h2>
+
+{{- range $paginator.Pages }}
+<article class="post-entry">
+  {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
+  {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">{{ .Title }}</h2>
+  </header>
+  {{- if (ne (.Param "hideSummary") true) }}
+  <div class="entry-content">
+    <p>{{ .Summary | plainify | htmlUnescape }}{{ if .Truncated }}...{{ end }}</p>
+  </div>
+  {{- end }}
+  {{- if not (.Param "hideMeta") }}
+  <footer class="entry-footer">{{- partial "post_meta.html" . -}}</footer>
+  {{- end }}
+  <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
+</article>
+{{- end }}
+
+{{- if gt $paginator.TotalPages 1 }}
+<footer class="page-footer">
+  <nav class="pagination">
+    {{- if $paginator.HasPrev }}
+    <a class="prev" href="{{ $paginator.Prev.URL | absURL }}">«&nbsp;{{ i18n "prev_page" }}</a>
+    {{- end }}
+    {{- if $paginator.HasNext }}
+    <a class="next" href="{{ $paginator.Next.URL | absURL }}">{{ i18n "next_page" }}&nbsp;»</a>
+    {{- end }}
+  </nav>
+</footer>
+{{- end }}
+
+{{- end }}{{- /* end main */ -}}

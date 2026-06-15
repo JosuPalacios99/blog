@@ -1,7 +1,6 @@
-baseURL = "https://CHANGE-ME.github.io/"
-locale = "en-us"
-title = "RedTeam Notes"
+baseURL = "https://josupalacios99.github.io/blog/"
 theme = "PaperMod"
+defaultContentLanguage = "es"
 
 # Pagination
 [pagination]
@@ -17,7 +16,18 @@ theme = "PaperMod"
   [markup.goldmark.renderer]
     unsafe = true  # allow raw HTML in markdown
 
+# Enable search output (PaperMod fuse.js search)
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+# Taxonomies (tags, categorías y series de posts)
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+  series = "series"
+
 [params]
+  author = "j0su"
   defaultTheme = "dark"
   ShowReadingTime = true
   ShowCodeCopyButtons = true
@@ -26,30 +36,71 @@ theme = "PaperMod"
   ShowBreadCrumbs = true
   ShowPostNavLinks = true
   ShowWordCount = true
-  homeInfoParams.Title = "RedTeam Notes"
-  homeInfoParams.Content = "Offensive security writeups, TTPs, tooling, and lab notes."
+  mainSections = ["posts"]
+  displayFullLangName = true
+
+  # cover solo en tarjetas (home/listado), no dentro del post
+  [params.cover]
+    hiddenInSingle = true
 
   [[params.socialIcons]]
     name = "github"
-    url = "https://github.com/CHANGE-ME"
+    url = "https://github.com/JosuPalacios99"
 
-# Top menu
-[[menu.main]]
-  identifier = "posts"
-  name = "Posts"
-  url = "/posts/"
-  weight = 10
-[[menu.main]]
-  identifier = "tags"
-  name = "Tags"
-  url = "/tags/"
-  weight = 20
-[[menu.main]]
-  identifier = "search"
-  name = "Search"
-  url = "/search/"
-  weight = 30
+# ===================== Idiomas =====================
+[languages]
+  [languages.es]
+    languageCode = "es-ES"
+    title = "root@j0su"
+    weight = 1
+    copyright = "© 2026 **root@j0su** · pensar como el adversario"
+    [languages.es.params]
+      flag = "🇪🇸"
+    [[languages.es.menus.main]]
+      identifier = "posts"
+      name = "Posts"
+      url = "/posts/"
+      weight = 10
+    [[languages.es.menus.main]]
+      identifier = "tags"
+      name = "Tags"
+      url = "/tags/"
+      weight = 20
+    [[languages.es.menus.main]]
+      identifier = "search"
+      name = "Buscar"
+      url = "/search/"
+      weight = 30
+    [[languages.es.menus.main]]
+      identifier = "github"
+      name = "GitHub ↗"
+      url = "https://github.com/JosuPalacios99"
+      weight = 40
 
-# Enable search output (PaperMod fuse.js search)
-[outputs]
-  home = ["HTML", "RSS", "JSON"]
+  [languages.en]
+    languageCode = "en-US"
+    title = "root@j0su"
+    weight = 2
+    copyright = "© 2026 **root@j0su** · think like the adversary"
+    [languages.en.params]
+      flag = "🇬🇧"
+    [[languages.en.menus.main]]
+      identifier = "posts"
+      name = "Posts"
+      url = "/posts/"
+      weight = 10
+    [[languages.en.menus.main]]
+      identifier = "tags"
+      name = "Tags"
+      url = "/tags/"
+      weight = 20
+    [[languages.en.menus.main]]
+      identifier = "search"
+      name = "Search"
+      url = "/search/"
+      weight = 30
+    [[languages.en.menus.main]]
+      identifier = "github"
+      name = "GitHub ↗"
+      url = "https://github.com/JosuPalacios99"
+      weight = 40
