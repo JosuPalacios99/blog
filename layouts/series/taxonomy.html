@@ -1,0 +1,36 @@
+{{- define "main" }}
+
+<h1 class="rt-section-title"><span class="rt-prompt">&gt;</span> Series</h1>
+<p class="rt-rail-intro">
+  {{- if eq site.Language.Lang "en" -}}
+  Series group related articles, meant to be read in order: each step builds on the previous one.
+  {{- else -}}
+  Las series agrupan artículos relacionados, pensados para leerse en orden: cada peldaño se apoya en el anterior.
+  {{- end -}}
+</p>
+
+{{- if .Pages }}
+{{- range .Pages }}
+<section class="rt-rail">
+  <h2 class="rt-rail-title">{{ .LinkTitle }}<span class="rt-rail-count">{{ len .Pages }} {{ if eq site.Language.Lang "en" }}parts{{ else }}partes{{ end }}</span></h2>
+  <ol class="rt-rail-steps">
+    {{- range $i, $p := .Pages.ByDate }}
+    <li class="rt-rail-step">
+      <span class="rt-rail-node">{{ add $i 1 }}</span>
+      <a class="rt-rail-card" href="{{ $p.Permalink }}">
+        <span class="rt-rail-link">{{ $p.Title }}</span>
+        <span class="rt-rail-meta">{{ $p.Date.Format "2006-01-02" }}</span>
+        <span class="rt-rail-sum">{{ $p.Summary | plainify | htmlUnescape | truncate 150 }}</span>
+      </a>
+    </li>
+    {{- end }}
+  </ol>
+</section>
+{{- end }}
+{{- else }}
+<p class="rt-rail-empty">
+  {{- if eq site.Language.Lang "en" }}No series published yet.{{ else }}Aún no hay series publicadas.{{ end -}}
+</p>
+{{- end }}
+
+{{- end }}

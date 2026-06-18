@@ -32,39 +32,9 @@
 {{- $pages := where site.RegularPages "Type" "in" site.Params.mainSections }}
 {{- $pages = where $pages "Params.hiddenInHomeList" "!=" "true" }}
 {{- $pages = $pages.ByDate.Reverse }}
+{{- $paginator := .Paginate $pages }}
 
-{{/* ----- Series (rail/timeline) ----- */}}
-{{- $series := site.Taxonomies.series }}
-{{- if $series }}
-<h2 class="rt-section-title"><span class="rt-prompt">&gt;</span> Series</h2>
-{{- range $term, $wp := $series }}
-{{- $tp := site.GetPage (printf "series/%s" $term) }}
-<section class="rt-rail">
-  <h3 class="rt-rail-title">{{ with $tp }}{{ .LinkTitle }}{{ else }}{{ $term | humanize }}{{ end }}<span class="rt-rail-count">{{ len $wp }} {{ if eq site.Language.Lang "en" }}parts{{ else }}partes{{ end }}</span></h3>
-  <ol class="rt-rail-steps">
-    {{- range $i, $p := $wp.Pages.ByDate }}
-    <li class="rt-rail-step">
-      <span class="rt-rail-node">{{ add $i 1 }}</span>
-      <a class="rt-rail-card" href="{{ $p.Permalink }}">
-        <span class="rt-rail-link">{{ $p.Title }}</span>
-        <span class="rt-rail-meta">{{ $p.Date.Format "2006-01-02" }}</span>
-        <span class="rt-rail-sum">{{ $p.Summary | plainify | htmlUnescape | truncate 140 }}</span>
-      </a>
-    </li>
-    {{- end }}
-  </ol>
-</section>
-{{- end }}
-{{- end }}
-
-{{/* ----- Posts sueltos (sin serie) ----- */}}
-{{- $standalone := slice }}
-{{- range $pages }}{{ if not .Params.series }}{{ $standalone = $standalone | append . }}{{ end }}{{- end }}
-{{- $paginator := .Paginate $standalone }}
-
-{{- if $standalone }}
 <h2 class="rt-section-title"><span class="rt-prompt">&gt;</span> {{ if eq site.Language.Lang "en" }}Latest posts{{ else }}Últimos posts{{ end }}</h2>
-{{- end }}
 
 {{- range $paginator.Pages }}
 <article class="post-entry">

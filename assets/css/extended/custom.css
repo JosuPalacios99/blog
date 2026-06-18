@@ -623,7 +623,13 @@ html { scroll-padding-top: 72px; }
     font-weight: 700;
 }
 
-/* ============ SERIES RAIL (home) ============ */
+/* ============ SERIES RAIL (página /series/) ============ */
+.rt-rail-intro {
+    color: var(--secondary);
+    margin: 0 0 2rem;
+    max-width: 60ch;
+}
+.rt-rail-empty { color: var(--secondary); }
 .rt-rail { margin: 0 0 2.4rem; }
 .rt-rail-title {
     display: flex;
