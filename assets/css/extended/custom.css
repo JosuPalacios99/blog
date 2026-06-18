@@ -623,6 +623,95 @@ html { scroll-padding-top: 72px; }
     font-weight: 700;
 }
 
+/* ============ SERIES RAIL (home) ============ */
+.rt-rail { margin: 0 0 2.4rem; }
+.rt-rail-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 1rem;
+    color: var(--primary);
+    margin: 0 0 1rem;
+}
+.rt-rail-count {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+}
+.rt-rail-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 2.6rem;
+    position: relative;
+}
+.rt-rail-steps::before {
+    content: "";
+    position: absolute;
+    left: 0.72rem;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 2px;
+    background: linear-gradient(var(--accent), rgba(229, 72, 77, 0.15));
+}
+.rt-rail-step { position: relative; margin-bottom: 0.9rem; }
+.rt-rail-node {
+    position: absolute;
+    left: -2.6rem;
+    top: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 0 0 4px var(--theme), 0 0 12px var(--accent-glow);
+    z-index: 1;
+}
+.rt-rail-card {
+    display: block;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius);
+    padding: 0.7rem 1rem;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.rt-rail-card:hover {
+    border-left-color: var(--accent);
+    transform: translateX(3px);
+}
+.rt-rail-link {
+    display: block;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.02rem;
+}
+.rt-rail-meta {
+    display: block;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.74rem;
+    color: var(--secondary);
+    margin-top: 0.15rem;
+}
+.rt-rail-sum {
+    display: block;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    margin-top: 0.35rem;
+}
+
 /* ============ CTA SUAVE ============ */
 .rt-cta {
     margin: 2.5rem 0 0.5rem;
