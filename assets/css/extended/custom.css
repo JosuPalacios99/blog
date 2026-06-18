@@ -187,7 +187,20 @@ html { scroll-padding-top: 72px; }
 }
 
 /* ---- Tables ---- */
-.post-content table th { background: var(--entry); }
+.post-content table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.post-content table th,
+.post-content table td {
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+}
+.post-content table th {
+    background: var(--entry);
+    border-bottom: 2px solid var(--accent);
+}
 .post-content table tr:hover td { background: rgba(229, 72, 77, 0.05); }
 
 /* ---- Tags / badges (post footer) ---- */
@@ -586,14 +599,29 @@ html { scroll-padding-top: 72px; }
     margin: 0;
     padding-left: 1.3rem;
 }
-.rt-series-list li { margin: 0.2rem 0; }
-.rt-series-list a { color: var(--accent-soft); text-decoration: none; }
-.rt-series-list a:hover { text-decoration: underline; }
-.rt-series-list li.current > span {
-    color: var(--primary);
-    font-weight: 600;
+.rt-series-list li { margin: 0.35rem 0; }
+.rt-series-list a {
+    color: var(--secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
 }
-.rt-series-list li.current::marker { color: var(--accent); }
+.rt-series-list a:hover { color: var(--accent-soft); text-decoration: underline; }
+
+/* Post actual de la serie: resaltado inequívoco */
+.rt-series-list li.current {
+    background: rgba(229, 72, 77, 0.1);
+    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+    margin-left: -0.5rem;
+}
+.rt-series-list li.current::marker {
+    color: var(--accent);
+    font-weight: 700;
+}
+.rt-series-cur {
+    color: var(--accent);
+    font-weight: 700;
+}
 
 /* ============ CTA SUAVE ============ */
 .rt-cta {
