@@ -15,12 +15,20 @@
   <h2 class="rt-rail-title">{{ .LinkTitle }}<span class="rt-rail-count">{{ len .Pages }} {{ if eq site.Language.Lang "en" }}parts{{ else }}partes{{ end }}</span></h2>
   <ol class="rt-rail-steps">
     {{- range $i, $p := .Pages.ByDate }}
+    {{- $cover := "" }}
+    {{- with $p.Params.cover }}{{ with .image }}{{ $cover = $p.Resources.GetMatch . }}{{ end }}{{ end }}
     <li class="rt-rail-step">
       <span class="rt-rail-node">{{ add $i 1 }}</span>
       <a class="rt-rail-card" href="{{ $p.Permalink }}">
-        <span class="rt-rail-link">{{ $p.Title }}</span>
-        <span class="rt-rail-meta">{{ $p.Date.Format "2006-01-02" }}</span>
-        <span class="rt-rail-sum">{{ $p.Summary | plainify | htmlUnescape | truncate 150 }}</span>
+        {{- with $cover }}
+        {{- $thumb := .Fill "360x200 webp q85 Center" }}
+        <img class="rt-rail-thumb" src="{{ $thumb.RelPermalink }}" width="{{ $thumb.Width }}" height="{{ $thumb.Height }}" alt="" loading="lazy">
+        {{- end }}
+        <span class="rt-rail-body">
+          <span class="rt-rail-link">{{ $p.Title }}</span>
+          <span class="rt-rail-meta">{{ $p.Date.Format "2006-01-02" }}</span>
+          <span class="rt-rail-sum">{{ $p.Summary | plainify | htmlUnescape | truncate 150 }}</span>
+        </span>
       </a>
     </li>
     {{- end }}
