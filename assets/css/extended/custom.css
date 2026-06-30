@@ -186,6 +186,12 @@ html { scroll-padding-top: 72px; }
     border-radius: var(--radius);
 }
 
+/* Resaltado por clases (noClasses=false). El color de tokens lo da chroma-themes.css
+   (github en claro, dracula en oscuro). Aquí solo fijamos el fondo del bloque por tema. */
+:root[data-theme="light"] { --code-block-bg: #eef1f4; }
+:root:not([data-theme="light"]) { --code-block-bg: #282a36; }
+:root[data-theme="light"] .post-content pre { border-color: #d7dbe0; }
+
 /* ---- Tables ---- */
 .post-content table {
     border: 1px solid var(--border);
@@ -267,6 +273,9 @@ html { scroll-padding-top: 72px; }
 .post-content img {
     border-radius: var(--radius);
     border: 1px solid var(--border);
+    padding: 8px;
+    background: var(--entry);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 /* ---- Text selection ---- */

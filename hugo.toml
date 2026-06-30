@@ -1,6 +1,7 @@
 baseURL = "https://josupalacios99.github.io/blog/"
 theme = "PaperMod"
 defaultContentLanguage = "es"
+capitalizeListTitles = false
 
 # Pagination
 [pagination]
@@ -11,7 +12,7 @@ defaultContentLanguage = "es"
   [markup.highlight]
     style = "dracula"
     lineNos = true
-    noClasses = true
+    noClasses = false
     guessSyntax = true
   [markup.goldmark.renderer]
     unsafe = true  # allow raw HTML in markdown

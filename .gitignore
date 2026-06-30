@@ -9,3 +9,5 @@
 # Posts ocultos (draft) — no publicar su fuente en el repo público todavía
 /content/posts/red-teaming-pensar-como-el-adversario/
 /content/posts/que-servicio-de-seguridad-ofensiva-necesitas/
+/content/posts/adws-enumeracion-sigilosa-active-directory/
+/content/posts/adcs-ntlmrelayx-sid-extension/
