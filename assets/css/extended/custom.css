@@ -44,6 +44,16 @@ html { scroll-padding-top: 72px; }
     background: rgba(13, 15, 18, 0.72);
 }
 :root[data-theme="light"] .header { background: rgba(255, 255, 255, 0.82); }
+/* En móvil el backdrop-filter sobre un header sticky repinta en cada frame de
+   scroll y provoca tirones (sobre todo iOS Safari). Fondo opaco y sin blur. */
+@media (max-width: 768px) {
+    .header {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: rgb(13, 15, 18);
+    }
+    :root[data-theme="light"] .header { background: rgb(255, 255, 255); }
+}
 
 .header-nav {
     max-width: calc(var(--nav-width) + var(--gap) * 2);
@@ -193,10 +203,17 @@ html { scroll-padding-top: 72px; }
 :root[data-theme="light"] .post-content pre { border-color: #d7dbe0; }
 
 /* ---- Tables ---- */
+/* display:block + overflow-x:auto: una tabla ancha scrollea dentro de sí misma
+   en lugar de desbordar el viewport y arrastrar el scroll horizontal de la página. */
 .post-content table {
+    display: block;
+    max-width: 100%;
+    width: -moz-fit-content;
+    width: fit-content;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    overflow: hidden;
 }
 .post-content table th,
 .post-content table td {

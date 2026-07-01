@@ -60,22 +60,22 @@ capitalizeListTitles = false
     [[languages.es.menus.main]]
       identifier = "posts"
       name = "Posts"
-      url = "/posts/"
+      url = "posts/"
       weight = 10
     [[languages.es.menus.main]]
       identifier = "series"
       name = "Series"
-      url = "/series/"
+      url = "series/"
       weight = 15
     [[languages.es.menus.main]]
       identifier = "tags"
       name = "Tags"
-      url = "/tags/"
+      url = "tags/"
       weight = 20
     [[languages.es.menus.main]]
       identifier = "search"
       name = "Buscar"
-      url = "/search/"
+      url = "search/"
       weight = 30
     [[languages.es.menus.main]]
       identifier = "github"
@@ -93,22 +93,22 @@ capitalizeListTitles = false
     [[languages.en.menus.main]]
       identifier = "posts"
       name = "Posts"
-      url = "/posts/"
+      url = "posts/"
       weight = 10
     [[languages.en.menus.main]]
       identifier = "series"
       name = "Series"
-      url = "/series/"
+      url = "series/"
       weight = 15
     [[languages.en.menus.main]]
       identifier = "tags"
       name = "Tags"
-      url = "/tags/"
+      url = "tags/"
       weight = 20
     [[languages.en.menus.main]]
       identifier = "search"
       name = "Search"
-      url = "/search/"
+      url = "search/"
       weight = 30
     [[languages.en.menus.main]]
       identifier = "github"
