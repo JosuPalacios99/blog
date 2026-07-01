@@ -106,8 +106,12 @@
     links.forEach(function (a) { a.classList.remove('active'); });
     if (map[id]) {
       map[id].classList.add('active');
-      // keep active link visible in the scrollable sidebar
-      map[id].scrollIntoView({ block: 'nearest' });
+      // keep active link visible in the scrollable sidebar (desktop only).
+      // On mobile the TOC is inline, so scrollIntoView would yank the whole
+      // page back up on every heading and fight the user's scroll.
+      if (window.matchMedia('(min-width: 1280px)').matches) {
+        map[id].scrollIntoView({ block: 'nearest' });
+      }
     }
   }
 
