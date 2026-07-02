@@ -56,9 +56,14 @@ html { scroll-padding-top: 72px; }
 }
 
 .header-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     max-width: calc(var(--nav-width) + var(--gap) * 2);
     height: 64px;
 }
+.logo { margin-right: auto; }
 
 /* brand glow on hover */
 .logo a:hover { text-shadow: 0 0 14px var(--accent-glow); }
@@ -84,9 +89,9 @@ html { scroll-padding-top: 72px; }
 }
 #menu .active::after { display: none; }
 
-/* theme toggle as last menu item (right of GitHub) */
-.theme-toggle-li { display: flex; align-items: center; }
-.theme-toggle-li #theme-toggle {
+/* actions siempre visibles a la derecha: idioma + tema */
+.nav-actions { display: flex; align-items: center; gap: 0.2rem; }
+.nav-actions #theme-toggle {
     display: inline-flex;
     align-items: center;
     background: none;
@@ -97,11 +102,8 @@ html { scroll-padding-top: 72px; }
     cursor: pointer;
     transition: color 0.18s ease;
 }
-.theme-toggle-li #theme-toggle:hover { color: var(--accent-soft); }
-
-/* language switch (flags) */
-.lang-switch-li { display: flex; align-items: center; }
-.lang-switch-li a {
+.nav-actions #theme-toggle:hover { color: var(--accent-soft); }
+.nav-actions .lang-switch {
     display: inline-flex;
     align-items: center;
     padding: 0.3rem 0.45rem;
@@ -110,7 +112,57 @@ html { scroll-padding-top: 72px; }
     border-radius: 6px;
     transition: transform 0.16s ease, background 0.16s ease;
 }
-.lang-switch-li a:hover { transform: scale(1.12); background: var(--entry); }
+.nav-actions .lang-switch:hover { transform: scale(1.12); background: var(--entry); }
+
+/* hamburguesa (solo móvil) */
+.nav-burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 40px;
+    height: 40px;
+    padding: 9px;
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.nav-burger span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--primary);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.nav-burger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-burger.open span:nth-child(2) { opacity: 0; }
+.nav-burger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ===== Navbar móvil: menú colapsable ===== */
+@media (max-width: 768px) {
+    .nav-burger { display: flex; }
+    #menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 90;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.1rem;
+        padding: 0.5rem 0.9rem 0.8rem;
+        background: rgb(13, 15, 18);
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+    :root[data-theme="light"] #menu { background: rgb(255, 255, 255); }
+    #menu.open { display: flex; }
+    #menu li { width: 100%; }
+    #menu a { width: 100%; padding: 0.7rem 0.8rem; }
+}
 
 /* ---- Home intro title: subtle gradient ---- */
 .first-entry .entry-header h1,
@@ -602,6 +654,59 @@ html { scroll-padding-top: 72px; }
     }
     .toc-side::-webkit-scrollbar { width: 6px; }
     .toc-side::-webkit-scrollbar-thumb { background: var(--tertiary); border-radius: 3px; }
+}
+
+/* ===== Índice móvil/tablet: botón flotante + bottom-sheet (<1280px) ===== */
+.toc-fab { display: none; }
+.toc-backdrop { display: none; }
+@media (max-width: 1279px) {
+    /* botón flotante fijo, accesible desde cualquier punto del scroll */
+    .toc-fab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        right: 1.1rem;
+        bottom: 1.1rem;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: 0;
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 8px 22px -6px rgba(0, 0, 0, 0.55);
+        z-index: 190;
+        cursor: pointer;
+    }
+    body.toc-open .toc-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 195;
+    }
+    /* el índice inline pasa a ser una hoja inferior deslizante */
+    .toc-side {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 200;
+        margin: 0;
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.4rem 0.4rem 1rem;
+        background: rgb(13, 15, 18);
+        border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -12px 30px -12px rgba(0, 0, 0, 0.6);
+        transform: translateY(100%);
+        transition: transform 0.25s ease;
+    }
+    :root[data-theme="light"] .toc-side { background: rgb(255, 255, 255); }
+    body.toc-open .toc-side { transform: translateY(0); }
+    .toc-side-inner { border: 0; background: transparent; }
 }
 
 /* ============ CAJA DE SERIE ============ */

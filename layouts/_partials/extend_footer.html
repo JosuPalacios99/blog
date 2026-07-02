@@ -1,0 +1,59 @@
+<script>
+(function () {
+  // --- Mobile nav (hamburger) ---
+  var burger = document.getElementById('nav-burger');
+  var menu = document.getElementById('menu');
+  if (burger && menu) {
+    function closeNav() {
+      menu.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+    burger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('a')) closeNav();
+    });
+    document.addEventListener('click', function (e) {
+      if (menu.classList.contains('open') &&
+          !menu.contains(e.target) && !burger.contains(e.target)) {
+        closeNav();
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeNav();
+    });
+  }
+
+  // --- Mobile TOC (floating button) ---
+  var fab = document.getElementById('toc-fab');
+  var toc = document.getElementById('toc-side');
+  var backdrop = document.getElementById('toc-backdrop');
+  if (fab && toc) {
+    function closeToc() {
+      document.body.classList.remove('toc-open');
+      fab.setAttribute('aria-expanded', 'false');
+      if (backdrop) backdrop.hidden = true;
+    }
+    function openToc() {
+      document.body.classList.add('toc-open');
+      fab.setAttribute('aria-expanded', 'true');
+      if (backdrop) backdrop.hidden = false;
+    }
+    fab.addEventListener('click', function () {
+      if (document.body.classList.contains('toc-open')) closeToc(); else openToc();
+    });
+    if (backdrop) backdrop.addEventListener('click', closeToc);
+    toc.addEventListener('click', function (e) {
+      if (e.target.closest('a')) closeToc();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeToc();
+    });
+  }
+})();
+</script>
