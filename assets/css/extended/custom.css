@@ -868,6 +868,145 @@ html { scroll-padding-top: 72px; }
     margin-top: 0.35rem;
 }
 
+/* ============ TOOLS (índice por fases) ============ */
+.rt-tool-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 2.4rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--entry);
+}
+.rt-tool-filter-label {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--secondary);
+    margin-right: 0.3rem;
+}
+.rt-tool-tag {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    line-height: 1;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--theme);
+    color: var(--secondary);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.rt-tool-tag::before { content: "#"; color: var(--accent); margin-right: 1px; }
+.rt-tool-tag[data-tag="*"]::before { content: ""; margin: 0; }
+.rt-tool-tag:hover { color: var(--accent-soft); border-color: var(--accent); }
+.rt-tool-tag.is-active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.rt-tool-tag.is-active::before { color: #fff; }
+
+/* ---- Fase ---- */
+.rt-phase { margin: 0 0 2.6rem; }
+.rt-phase-title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 1.15rem;
+    color: var(--primary);
+    margin: 0 0 1.1rem;
+    padding: 0;
+    border: 0;
+}
+.rt-phase-idx {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+.rt-phase-name { font-weight: 700; }
+.rt-phase-count {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--secondary);
+    background: var(--tertiary);
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+}
+
+/* ---- Tarjetas de tool ---- */
+.rt-tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+.rt-tool-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid transparent;
+    border-radius: var(--radius);
+    background: var(--entry);
+    text-decoration: none;
+    transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+.rt-tool-card:hover {
+    border-color: var(--accent);
+    border-left-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 26px -10px var(--accent-glow);
+}
+.rt-tool-head { display: flex; align-items: center; gap: 0.55rem; }
+.rt-tool-gh { color: var(--secondary); flex-shrink: 0; transition: color 0.16s ease; }
+.rt-tool-card:hover .rt-tool-gh { color: var(--accent-soft); }
+.rt-tool-name {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--primary);
+}
+.rt-tool-card:hover .rt-tool-name { color: var(--accent-soft); }
+.rt-tool-ext { color: var(--secondary); margin-left: auto; flex-shrink: 0; }
+.rt-tool-desc {
+    margin: 0;
+    color: var(--content);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.rt-tool-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: auto; }
+.rt-tool-chip {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--theme);
+    color: var(--secondary);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.rt-tool-chip::before { content: "#"; color: var(--accent); }
+.rt-tool-chip:hover { color: var(--accent-soft); border-color: var(--accent); }
+.rt-tool-empty {
+    color: var(--secondary);
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    text-align: center;
+    margin: 2rem 0;
+}
+
 /* ============ CTA SUAVE ============ */
 .rt-cta {
     margin: 2.5rem 0 0.5rem;

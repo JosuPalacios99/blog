@@ -63,6 +63,11 @@ capitalizeListTitles = false
       url = "posts/"
       weight = 10
     [[languages.es.menus.main]]
+      identifier = "tools"
+      name = "Tools"
+      url = "tools/"
+      weight = 12
+    [[languages.es.menus.main]]
       identifier = "series"
       name = "Series"
       url = "series/"
@@ -95,6 +100,11 @@ capitalizeListTitles = false
       name = "Posts"
       url = "posts/"
       weight = 10
+    [[languages.en.menus.main]]
+      identifier = "tools"
+      name = "Tools"
+      url = "tools/"
+      weight = 12
     [[languages.en.menus.main]]
       identifier = "series"
       name = "Series"

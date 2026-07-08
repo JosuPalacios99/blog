@@ -1,0 +1,44 @@
+# Índice de herramientas propias, agrupadas por fase del ataque.
+# Añadir una tool nueva = añadir un bloque en `tools` con su `phase` (id de abajo).
+
+phases:
+  - id: recon
+    order: 1
+    name:
+      es: "Reconocimiento"
+      en: "Recon"
+  - id: ad-enum
+    order: 2
+    name:
+      es: "Enumeración de AD"
+      en: "AD Enumeration"
+  - id: post-exploitation
+    order: 3
+    name:
+      es: "Post-Explotación"
+      en: "Post-Exploitation"
+
+tools:
+  - name: linkhawk
+    phase: recon
+    repo: https://github.com/JosuPalacios99/linkhawk
+    tags: [osint, linkedin, recon, python]
+    desc:
+      es: "Obtiene los empleados de una organización a través de LinkedIn."
+      en: "Harvests an organization's employees through LinkedIn."
+
+  - name: ADWSHound
+    phase: ad-enum
+    repo: https://github.com/JosuPalacios99/ADWSHound
+    tags: [active-directory, bloodhound, adws, opsec, python]
+    desc:
+      es: "Ingestor de BloodHound CE en Python que usa el protocolo ADWS, con consideraciones OPSEC extra."
+      en: "Python BloodHound CE ingestor over the ADWS protocol, with extra OPSEC considerations."
+
+  - name: BloodHound-Owned
+    phase: post-exploitation
+    repo: https://github.com/JosuPalacios99/BloodHound-Owned
+    tags: [bloodhound, active-directory, api, python]
+    desc:
+      es: "Habla con la API de BloodHound CE para marcar como Owned una lista de usuarios."
+      en: "Talks to the BloodHound CE API to mark a list of users as Owned."
