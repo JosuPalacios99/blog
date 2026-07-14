@@ -21,6 +21,13 @@ capitalizeListTitles = false
 [outputs]
   home = ["HTML", "RSS", "JSON"]
 
+# Cachea las llamadas a la API de GitHub (stars/forks de /tools/) 24h en local.
+# En CI el build parte limpio, así que el rebuild diario (cron) trae datos frescos.
+[caches]
+  [caches.getresource]
+    dir = ":cacheDir/:project"
+    maxAge = "24h"
+
 # Taxonomies (tags, categorías y series de posts)
 [taxonomies]
   tag = "tags"

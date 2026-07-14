@@ -978,7 +978,25 @@ html { scroll-padding-top: 72px; }
     color: var(--primary);
 }
 .rt-tool-card:hover .rt-tool-name { color: var(--accent-soft); }
-.rt-tool-ext { color: var(--secondary); margin-left: auto; flex-shrink: 0; }
+.rt-tool-head-right {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.rt-tool-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--secondary);
+    transition: color 0.16s ease;
+}
+.rt-tool-stat svg { flex-shrink: 0; }
+.rt-tool-card:hover .rt-tool-stat { color: var(--content); }
+.rt-tool-ext { color: var(--secondary); flex-shrink: 0; }
 .rt-tool-desc {
     margin: 0;
     color: var(--content);

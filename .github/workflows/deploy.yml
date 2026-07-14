@@ -4,6 +4,9 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # Rebuild diario para refrescar stars/forks de GitHub en /tools/ (07:00 UTC).
+  schedule:
+    - cron: "0 7 * * *"
 
 permissions:
   contents: read
