@@ -37,6 +37,9 @@ capitalizeListTitles = false
 [params]
   author = "j0su"
   defaultTheme = "dark"
+  # Analítica GoatCounter (sin cookies). Pon aquí tu subdominio, sin ".goatcounter.com".
+  # Ej.: si tu panel es https://j0su.goatcounter.com → goatcounter = "j0su"
+  goatcounter = "j0su"
   ShowReadingTime = true
   ShowCodeCopyButtons = true
   ShowToc = true
