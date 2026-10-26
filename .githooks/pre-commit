@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+# Bloquea el commit de posts marcados como draft (draft: true).
+# Un post se considera draft si su index.md tiene 'draft: true' en el frontmatter.
+# Pensado para que un borrador en curso (y sus imágenes) nunca se suba por error.
+#
+# Saltar la comprobación de forma puntual:  git commit --no-verify
+#
+set -euo pipefail
+
+staged="$(git diff --cached --name-only --diff-filter=ACM || true)"
+[ -z "$staged" ] && exit 0
+
+# Lee el valor de 'draft:' del frontmatter. Usa la versión staged del fichero
+# si está en el commit; si no, la del árbol de trabajo.
+draft_value() {
+  local path="$1" content=""
+  if printf '%s\n' "$staged" | grep -qxF "$path"; then
+    content="$(git show ":$path" 2>/dev/null || true)"
+  elif [ -f "$path" ]; then
+    content="$(cat "$path")"
+  else
+    return 0
+  fi
+  printf '%s\n' "$content" | awk '
+    /^---[[:space:]]*$/ { fm++; if (fm==2) exit; next }
+    fm==1 && $1=="draft:" { print $2; exit }'
+}
+
+# Directorios de post (leaf bundles) con algún fichero staged.
+mapfile -t post_dirs < <(printf '%s\n' "$staged" \
+  | grep -E '^content/posts/[^/]+/' \
+  | sed -E 's#^(content/posts/[^/]+)/.*#\1#' \
+  | sort -u || true)
+
+blocked=()
+for dir in "${post_dirs[@]:-}"; do
+  [ -z "$dir" ] && continue
+  if [ "$(draft_value "$dir/index.md")" = "true" ]; then
+    blocked+=("$dir")
+  fi
+done
+
+if [ "${#blocked[@]}" -gt 0 ]; then
+  echo "" >&2
+  echo "  ✖ Commit bloqueado: hay posts en modo draft en el stage." >&2
+  echo "" >&2
+  for d in "${blocked[@]}"; do echo "      • $d  (draft: true)" >&2; done
+  echo "" >&2
+  echo "  Un borrador no debe subirse. Elige:" >&2
+  echo "    · Ya está listo  → pon 'draft: false' en index.md y vuelve a 'git add'." >&2
+  echo "    · Sigue en curso → sácalo del stage:  git restore --staged <dir>" >&2
+  echo "" >&2
+  echo "  (Puntualmente puedes saltarte esto con  git commit --no-verify)" >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit 0

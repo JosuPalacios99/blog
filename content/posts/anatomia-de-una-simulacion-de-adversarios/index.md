@@ -1,7 +1,7 @@
 ---
 title: "Anatomía de una Simulación de Adversarios: del objetivo al informe"
 date: 2026-08-25T10:00:00+02:00
-draft: true
+draft: false
 author: "j0su"
 tags: ["red-team", "simulacion-adversarios", "threat-intelligence", "mitre-attack", "pre-attack", "c2", "opsec", "purple-team"]
 categories: ["fundamentos"]
