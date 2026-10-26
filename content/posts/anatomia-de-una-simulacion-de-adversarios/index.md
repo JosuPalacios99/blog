@@ -246,7 +246,7 @@ Es la idea del _IS_ frente al _SHOULD-BE_ que vimos en el [primer artículo](../
 
 La palabra que gobierna todo esto es **controlado**. El objetivo es _probar_ el impacto, no _provocarlo_. Aquí es donde las reglas de enfrentamiento que se pactaron al principio valen su peso en oro: definen hasta dónde se puede llegar para que la demostración sea creíble sin poner en riesgo el negocio de verdad. El buen ladrón del ejercicio saca el cuadro de la vitrina, lo enseña a la cámara para dejar constancia de que pudo, y lo vuelve a colgar. No se lo lleva a casa.
 
-![Demostrar el impacto de forma controlada: enseñar el cuadro a la cámara y volver a colgarlo](impacto-comic.png)
+
 
 Demostrar el impacto es lo que convierte un hallazgo técnico en un argumento de negocio. _"Un atacante con un correo bien hecho podría, en X días, llegar a ordenar transferencias desde vuestro core"_ mueve presupuestos y decisiones de una forma que _"encontramos una ruta de movimiento lateral hasta el servidor SAP"_ no consigue jamás. Y ese argumento es, precisamente, lo que hay que dejar por escrito.
 
@@ -267,7 +267,7 @@ Por eso el informe suele hablar dos idiomas a la vez, para dos públicos distint
 
 Comparar lo que hizo el equipo ofensivo con lo que la defensa fue capaz de ver, aquella lista de TTPs que se mapeó con ATT&CK al principio, es exactamente el terreno del **Purple Team** que presentamos en el [primer artículo](../red-teaming-pensar-como-el-adversario/): poner una al lado de otra las acciones ejecutadas y las detectadas, y usar los huecos entre ambas como mapa de los puntos ciegos. Ahí es donde el informe deja de ser un veredicto y se convierte en un plan de mejora.
 
-![El debrief: entregar el informe al equipo técnico y a la dirección, con la ruta y los puntos débiles marcados](informe-comic.png)
+
 
 ## Conclusiones
 
@@ -291,6 +291,6 @@ Nos queda un cabo suelto que merece su propio artículo: qué pasa cuando el eje
 
 3. MITRE — _ATT&CK_: [attack.mitre.org](https://attack.mitre.org/). Base de conocimiento de tácticas, técnicas y procedimientos (TTPs) de adversarios reales, usada como lenguaje común para modelar la amenaza y mapear el ejercicio. Herramienta de mapeo: _ATT&CK Navigator_.
 
-4. Marcos de _Command and Control_ mencionados: _Cobalt Strike_ (comercial), _Mythic_ y _Sliver_ (código abierto), usados como ejemplos de infraestructura C2 en un ejercicio.
+
 
 5. Artículos previos de esta serie: [Red Teaming: pensar como el adversario](../red-teaming-pensar-como-el-adversario/) (qué es, emulación vs simulación, Zero Knowledge vs Assumed Breach) y [¿Qué servicio de seguridad ofensiva necesitas?](../que-servicio-de-seguridad-ofensiva-necesitas/) (escalera de madurez).

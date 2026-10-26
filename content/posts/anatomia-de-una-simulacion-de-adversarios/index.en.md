@@ -246,7 +246,7 @@ It is the idea of _IS_ versus _SHOULD-BE_ that we saw in the [first article](../
 
 The word that governs all of this is _controlled_. The goal is to _prove_ the impact, not to _cause_ it. This is where the rules of engagement agreed at the start are worth their weight in gold: they define how far you can go so that the demonstration is credible without putting the real business at risk. The good thief in the exercise takes the painting out of the display case, shows it to the camera to prove he could, and hangs it back. He does not take it home.
 
-![Demonstrating impact in a controlled way: showing the painting to the camera and hanging it back](impacto-comic.png)
+
 
 Demonstrating impact is what turns a technical finding into a business argument. _"An attacker with a well-crafted email could, in X days, reach the point of ordering transfers from your core system"_ moves budgets and decisions in a way that _"we found a lateral movement path to the SAP server"_ never will. And that argument is exactly what needs to be put in writing.
 
@@ -267,7 +267,7 @@ That is why the report usually speaks two languages at once, for two different a
 
 Comparing what the offensive team did with what the defence was able to see, that TTP list mapped with ATT&CK at the beginning, is exactly the terrain of the _Purple Team_ we introduced in the [first article](../red-teaming-pensar-como-el-adversario/): placing the executed actions and the detected ones side by side, and using the gaps between them as a map of the blind spots. That is where the report stops being a verdict and becomes an improvement plan.
 
-![The debrief: delivering the report to the technical team and leadership, with the route and weak points marked](informe-comic.png)
+
 
 ## Conclusions
 
@@ -291,6 +291,6 @@ There is one loose end that deserves its own article: what happens when the exer
 
 3. MITRE, _ATT&CK_: [attack.mitre.org](https://attack.mitre.org/). Knowledge base of tactics, techniques, and procedures (TTPs) from real adversaries, used as a common language for threat modelling and mapping the exercise. Mapping tool: _ATT&CK Navigator_.
 
-4. Command and Control frameworks mentioned: _Cobalt Strike_ (commercial), _Mythic_ and _Sliver_ (open-source), used as examples of C2 infrastructure in an exercise.
+
 
 5. Previous articles in this series: [Red Teaming: think like the adversary](../red-teaming-pensar-como-el-adversario/) (what it is, emulation vs simulation, Zero Knowledge vs Assumed Breach) and [Which offensive security service do you need?](../que-servicio-de-seguridad-ofensiva-necesitas/) (maturity ladder).
