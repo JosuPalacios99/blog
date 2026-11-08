@@ -548,6 +548,7 @@ html { scroll-padding-top: 72px; }
 
 /* ---- Print: PDF idéntico al blog (oscuro, sin cromo) ---- */
 @media print {
+    @page { margin: 1.8cm 1.5cm; }
     /* el PDF respeta el tema activo (claro u oscuro) */
     html, body {
         -webkit-print-color-adjust: exact;
@@ -559,12 +560,15 @@ html { scroll-padding-top: 72px; }
     .footer,
     .toc-side,
     #toc-side,
+    .toc-fab,
+    .toc-backdrop,
     .rt-pdf-btn,
     .post-footer,
     .paginav,
     .share-buttons,
     .breadcrumbs,
-    .top-link {
+    .top-link,
+    .rt-series-box {
         display: none !important;
     }
     main.main,
@@ -577,12 +581,68 @@ html { scroll-padding-top: 72px; }
         padding: 0 !important;
     }
     .post-content a { color: var(--accent-soft) !important; text-decoration: underline; }
-    pre, img, figure, table, blockquote {
+
+    /* evitar cortes dentro de bloques visuales */
+    pre, img, figure, table, blockquote, svg, video {
         page-break-inside: avoid;
         break-inside: avoid;
     }
-    .post-content h2, .post-content h3 { break-after: avoid; }
-    .post-content pre { white-space: pre-wrap; word-wrap: break-word; }
+    /* los SVG van envueltos en div; proteger el contenedor entero */
+    .post-content div[style*="overflow-x"] {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* las imágenes y gráficos nunca deben ser más altos que una página:
+       si lo son, se escalan para caber completos en vez de cortarse */
+    .post-content img,
+    .post-content svg {
+        max-width: 100% !important;
+        max-height: 22cm !important;   /* alto útil de A4 menos márgenes */
+        height: auto !important;
+        object-fit: contain;
+    }
+    .post-content figure img,
+    .post-content figure svg { margin-inline: auto; }
+
+    /* mantener el encabezado junto al inicio de su sección:
+       nunca huérfano al final de la página, y sin cortarse */
+    .post-content h2,
+    .post-content h3,
+    .post-content h4 {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+    /* un poco de respiro cuando un encabezado abre página */
+    .post-content h2 { break-before: auto; }
+
+    /* contenedor que crea rtPrintPDF(): encabezado + inicio de su sección
+       viajan juntos a la misma página (fiable en Chrome, a diferencia de
+       break-after) */
+    .rt-print-keep {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* no cortar items de lista a mitad; las listas largas SÍ pueden
+       repartirse entre páginas para no dejar huecos en blanco */
+    .post-content li {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* mínimo de líneas antes y después de un salto de página */
+    .post-content p { orphans: 3; widows: 3; }
+    .post-content pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        orphans: 3;
+        widows: 3;
+    }
+    /* video no reproduce en PDF: ocultar */
+    .post-content video { display: none !important; }
 }
 
 /* ============ TOC SIDEBAR ============ */

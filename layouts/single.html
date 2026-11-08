@@ -41,7 +41,7 @@
       <div class="toc-side-inner">
         <p class="toc-side-title"><span class="rt-prompt">&gt;</span> {{ i18n "toc" | default "Contenido" }}</p>
         {{ .TableOfContents }}
-        <button class="rt-pdf-btn" onclick="window.print()" aria-label="Descargar PDF">
+        <button class="rt-pdf-btn" onclick="rtPrintPDF()" aria-label="Descargar PDF">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -138,6 +138,46 @@
 
   targets.forEach(function (el) { obs.observe(el); });
 })();
+
+// Mantener cada encabezado pegado al inicio de su sección al imprimir.
+// Chrome ignora `break-after: avoid` en los <h2>, así que justo antes de
+// imprimir envolvemos cada encabezado con el primer bloque que le sigue en
+// un contenedor que el navegador sí respeta como indivisible, y lo deshacemos
+// al terminar.
+window.rtPrintPDF = function () {
+  var content = document.querySelector('.post-content');
+  if (!content) { window.print(); return; }
+
+  var wrappers = [];
+  var heads = content.querySelectorAll('h2, h3, h4');
+  Array.prototype.forEach.call(heads, function (h) {
+    var next = h.nextElementSibling;
+    // no agrupar dos encabezados seguidos: cada uno irá con su propio contenido
+    if (!next || /^H[1-6]$/.test(next.tagName)) return;
+    var box = document.createElement('div');
+    box.className = 'rt-print-keep';
+    h.parentNode.insertBefore(box, h);
+    box.appendChild(h);
+    box.appendChild(next);
+    wrappers.push(box);
+  });
+
+  var done = false;
+  function cleanup() {
+    if (done) return;
+    done = true;
+    wrappers.forEach(function (box) {
+      var parent = box.parentNode;
+      while (box.firstChild) parent.insertBefore(box.firstChild, box);
+      parent.removeChild(box);
+    });
+    window.removeEventListener('afterprint', cleanup);
+  }
+  window.addEventListener('afterprint', cleanup);
+  window.print();
+  // red de seguridad para navegadores que no disparan afterprint
+  setTimeout(cleanup, 1500);
+};
 </script>
 {{- end }}
 
